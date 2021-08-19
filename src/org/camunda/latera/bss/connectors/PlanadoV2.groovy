@@ -5,6 +5,7 @@ import org.camunda.latera.bss.http.HTTPRestProcessor
 import org.camunda.latera.bss.logging.SimpleLogger
 import static org.camunda.latera.bss.utils.Numeric.toIntSafe
 import static org.camunda.latera.bss.utils.StringUtil.joinNonEmpty
+import static org.camunda.latera.bss.utils.MapUtil.forceNvl
 import java.security.MessageDigest
 import io.vavr.control.Try
 
@@ -93,7 +94,7 @@ class PlanadoV2 {
       }
     }
 
-    LinkedHashMap payload = [
+    LinkedHashMap payload = forceNvl([
       external_id   : extId,
       organization  : false,
       first_name    : data.firstName          ?: '',
@@ -111,7 +112,7 @@ class PlanadoV2 {
         value : data.phone                    ?: '',
         type  : 'phone'
       ]]
-    ]
+    ])
 
     if (data.addressLat && data.addressLon) {
       payload.site_address.geolocation = [
