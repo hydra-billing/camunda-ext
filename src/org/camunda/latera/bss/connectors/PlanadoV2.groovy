@@ -46,13 +46,16 @@ class PlanadoV2 {
   }
 
   Map getClients() {
-    sendRequest('get', 'clients').getOrNull()
+    sendRequest('get', 'clients')
+            .map { r -> r.clients }
+            .getOrNull()
   }
 
   Boolean deleteClient(def extId) {
     sendRequest('delete', "clients/${extId}").isSuccess()
   }
 
+  // returns client uuid
   Map findOrCreateClient(Map data) {
     if (!data.contactName) {
       data.contactName = joinNonEmpty([
@@ -79,7 +82,7 @@ class PlanadoV2 {
 
     if (existingUser) {
       logger.info('Client exists')
-      return existingUser
+      return existingUser.uuid
     }
 
     ['phone',
@@ -122,7 +125,7 @@ class PlanadoV2 {
 
     logger.info('Creating new client')
 
-    sendRequest('post', 'clients', body: payload).getOrNull()
+    sendRequest('post', 'clients', body: payload)
   }
 
   Map findOrCreateOrganization(Map data) {
@@ -197,14 +200,24 @@ class PlanadoV2 {
     sendRequest('delete', "jobs/${jobId}").isSuccess()
   }
 
+  /* customer_fields variable has to be an array with the following format:
+  [
+    [
+      uuid: "field identifier",
+      name: "field name", // use uuid or name
+      value: $field_value // type of the value depends on the data_type of the field in Planado
+    ],
+    ...
+  ]
+  */
   Map createJob(Map data) {
-    if (data.extId && !data.clientId) {
-      data.clientId = getClient(data.extId)?.client_id
+    if (data.extId && !data.clientUuid) {
+      data.clientUuid = getClient(data.extId)?.uuid
     }
 
     LinkedHashMap payload = [
-      template_id   : toIntSafe(data.templateId),
-      client_id     : data.clientId,
+      template      : [uuid: data.templateUuid],
+      client        : [uuid: data.clientUuid],
       scheduled_at  : data.startDate,
       description   : data.description  ?: '',
       custom_fields : data.customFields ?: []
@@ -215,8 +228,8 @@ class PlanadoV2 {
     sendRequest('post', 'jobs', body: payload).getOrNull()
   }
 
-  Map updateJob(Map data, def jobId) {
-    logger.info("Updating job ${jobId}")
+  Map updateJob(Map data, def jobUuid) {
+    logger.info("Updating job ${jobUuid}")
 
     LinkedHashMap payload = [:].with {
       if (data.containsKey('description')) {
@@ -233,15 +246,19 @@ class PlanadoV2 {
       throw new Exception("No params for update")
     }
 
-    sendRequest('patch', "jobs/${jobId}", body: payload).getOrNull()
+    sendRequest('patch', "jobs/${jobUuid}", body: payload).getOrNull()
   }
 
-  Map getJob(def jobId) {
-    sendRequest('get', "jobs/${jobId}").getOrNull()
+  Map getJob(def jobUuid) {
+    sendRequest('get', "jobs/${jobUuid}")
+            .map { r -> r.job }
+            .getOrNull()
   }
 
-  Map getJobTemplate(def templateId) {
-    sendRequest('get', "templates/${templateId}").getOrNull()
+  Map getJobTemplate(def templateUuid) {
+    sendRequest('get', "templates/${templateUuid}")
+            .map { r -> r.template }
+            .getOrNull()
   }
 
   Try sendRequest(Map payload = [:], CharSequence method, CharSequence path) {
