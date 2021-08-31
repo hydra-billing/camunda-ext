@@ -20,7 +20,10 @@ class PlanadoV2 {
     String url   = execution.getVariable('planadoUrl')                                             ?: ENV['PLANADO_URL']   ?: 'https://api.planadoapp.com'
     String token = execution.getVariable('planadoToken') ?: execution.getVariable('planadoApiKey') ?: ENV['PLANADO_TOKEN'] ?: ENV['PLANADO_API_KEY']
 
-    LinkedHashMap headers = ['X-Planado-Api-Token': token]
+    LinkedHashMap headers = [
+      'X-Planado-Api-Token'        : token,
+      'X-Planado-Trigger-Webhooks' : true
+    ]
 
     this.http = new HTTPRestProcessor(
       baseUrl   : url,
