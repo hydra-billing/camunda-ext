@@ -29,15 +29,17 @@ class MailSender implements AutoCloseable {
   private Properties   props
   private Transport    transport
   private SimpleLogger logger
+  private String       timeout
 
   MailSender(DelegateExecution execution) {
     def ENV       = System.getenv()
 
-    this.logger    = new SimpleLogger(execution)
-    this.host      =  execution.getVariable('smtpHost')     ?: ENV['SMTP_HOST']
-    this.port      = (execution.getVariable('smtpPort')     ?: ENV['SMTP_PORT'] ?: 587).toInteger()
-    this.user      =  execution.getVariable('smtpUser')     ?: ENV['SMTP_USER']
-    this.password  =  execution.getVariable('smtpPassword') ?: ENV['SMTP_PASSWORD']
+    this.logger   = new SimpleLogger(execution)
+    this.host     = execution.getVariable('smtpHost')     ?: ENV['SMTP_HOST']
+    this.port     = (execution.getVariable('smtpPort')    ?: ENV['SMTP_PORT'] ?: 587).toInteger()
+    this.user     = execution.getVariable('smtpUser')     ?: ENV['SMTP_USER']
+    this.password = execution.getVariable('smtpPassword') ?: ENV['SMTP_PASSWORD']
+    this.timeout  = (ENV['SMTP_TIMEOUT'] ?: 600000).toString()
 
     this.auth = Boolean.valueOf(firstNotNull([
       execution.getVariable('smtpAuth'),
@@ -62,6 +64,10 @@ class MailSender implements AutoCloseable {
     this.props.put('mail.smtp.port',     port)
     this.props.put('mail.smtp.auth',     auth)
     this.props.put('mail.mime.encodefilename', true)
+    this.props.put("mail.smtp.timeout", this.timeout);
+    this.props.put("mail.smtp.connectiontimeout", this.timeout);
+    this.props.put("mail.smtps.timeout", this.timeout);
+    this.props.put("mail.smtps.connectiontimeout", this.timeout);
 
     if (this.auth) {
       this.props.put('mail.smtp.user',     user)
