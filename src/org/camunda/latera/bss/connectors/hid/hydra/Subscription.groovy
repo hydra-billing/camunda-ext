@@ -353,7 +353,7 @@ trait Subscription {
       closeChargeLog : false
     ] + input
     try {
-      logger.info("Closing subscription ${subscriptionId} with date ${endDate}")
+      logger.info("Closing subscription ${subscriptionId} with date ${params.endDate}")
       hid.execute('SI_USERS_PKG.SI_USER_GOODS_CLOSE', [
         num_N_SUBJ_GOOD_ID : subscriptionId,
         dt_D_END           : params.endDate,
@@ -384,6 +384,9 @@ trait Subscription {
    */
   Boolean closeSubscriptionForce(def subscriptionId, Temporal endDate = local()) {
     Boolean result = closeSubscription(subscriptionId, endDate: endDate, closeChargeLog: true)
+    if (!result) {
+      return false
+    }
 
     def chargeLogId = getChargeLogIdBySubscription(subscriptionId: subscriptionId, operationDate: endDate)
     if (chargeLogId) {
