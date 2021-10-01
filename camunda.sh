@@ -102,12 +102,13 @@ fi
 
 export HISTORY_LEVEL="${HISTORY_LEVEL:-${BPM_HISTORY_LEVEL:-none}}"
 
-XML_PROPERTIES="//bpm-platform/process-engine/properties"
-XML_HISTORY_LEVEL="${XML_PROPERTIES}[@name='history']"
+XML_PLATFORM_NAMESPACE="http://www.camunda.org/schema/1.0/BpmPlatform"
+XML_PLATFORM_PROPERTIES="//xmlns:bpm-platform/xmlns:process-engine/xmlns:properties/xmlns:property"
+XML_HISTORY_LEVEL="${XML_PLATFORM_PROPERTIES}[@name='history']"
 
 echo "Configure bpm platform"
 xmlstarlet ed -L \
-  -u "${XML_HISTORY_LEVEL}" -v "${HISTORY_LEVEL}" \
+  -N xmlns="${XML_PLATFORM_NAMESPACE}" -u "${XML_PLATFORM_HISTORY_LEVEL}" -v "${HISTORY_LEVEL}" \
   /camunda/conf/bpm-platform.xml
 
 CMD="/camunda/bin/catalina.sh"
