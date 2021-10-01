@@ -48,7 +48,7 @@ export HTTP_PROXY="${HTTP_PROXY:-${BPM_PROXY:-false}}"
 export HTTP_PROXY_HOST="${HTTP_PROXY_HOST:-${BPM_PROXY_HOST-}}"
 export HTTP_PROXY_PORT="${HTTP_PROXY_PORT:-${BPM_PROXY_PORT-}}"
 export HTTP_PROXY_PROTOCOL="${HTTP_PROXY_PROTOCOL:-${BPM_PROXY_PROTOCOL-}}"
-export HTTP_REDIRECT_PORT="${HTTP_REDIRECT_PORT:-${BPM_REDIRECT_PORT:-$HTTP_PORT}}"
+export HTTP_REDIRECT_PORT="${HTTP_REDIRECT_PORT:-${BPM_REDIRECT_PORT:-${HTTP_PROXY_PORT:-HTTP_PORT}}}"
 export HTTP_CONNECT_TIMEOUT_SEC="${HTTP_CONNECT_TIMEOUT_SEC:-300}"
 export HTTP_READ_TIMEOUT_SEC="${HTTP_READ_TIMEOUT_SEC:-300}"
 export HTTP_WRITE_TIMEOUT_SEC="${HTTP_WRITE_TIMEOUT_SEC:-300}"
@@ -63,31 +63,40 @@ if [[ "$HTTP_PROXY" == "true" && "x$HTTP_PROXY_PROTOCOL" != "x$HTTP_PROTOCOL" ]]
 fi
 
 XML_CONNECTOR="//Connector[@protocol='HTTP/1.1']"
-XML_HOST="${XML_CONNECTOR}/@address"
-XML_PORT="${XML_CONNECTOR}/@port"
-XML_TIMEOUT="${XML_CONNECTOR}/@connectionTimeout"
-XML_SECURE="${XML_CONNECTOR}/@secure"
-XML_PROTOCOL="${XML_CONNECTOR}/@scheme"
-XML_PROXY_PORT="${XML_CONNECTOR}/@proxyPort"
-XML_PROXY_HOST="${XML_CONNECTOR}/@proxyName"
-XML_REDIRECT_PORT="${XML_CONNECTOR}/@redirectPort"
+XML_HOST="address"
+XML_PORT="port"
+XML_TIMEOUT="connectionTimeout"
+XML_SECURE="secure"
+XML_PROTOCOL="scheme"
+XML_PROXY_PORT="proxyPort"
+XML_PROXY_HOST="proxyName"
+XML_REDIRECT_PORT="redirectPort"
 
 echo "Configure http listener"
 xmlstarlet ed -L \
-  -u "${XML_HOST}" -v "$HTTP_HOST" \
-  -u "${XML_PORT}" -v "$HTTP_PORT" \
-  -u "${XML_TIMEOUT}" -v "$HTTP_TIMEOUT" \
-  -u "${XML_REDIRECT_PORT}" -v "${HTTP_REDIRECT_PORT:-8443}" \
-    -u "${XML_SECURE}" -v "${HTTP_SECURE}" \
-    -u "${XML_PROTOCOL}" -v "${HTTP_PROTOCOL}" \
+  -d "${XML_CONNECTOR}/@${XML_HOST}" \
+  -d "${XML_CONNECTOR}/@${XML_PORT}" \
+  -d "${XML_CONNECTOR}/@${XML_TIMEOUT}" \
+  -d "${XML_CONNECTOR}/@${XML_REDIRECT_PORT}" \
+  -d "${XML_CONNECTOR}/@${XML_SECURE}" \
+  -d "${XML_CONNECTOR}/@${XML_PROTOCOL}" \
+  -i "${XML_CONNECTOR}" -t "attr" -n "${XML_HOST}" -v "$HTTP_HOST" \
+  -i "${XML_CONNECTOR}" -t "attr" -n "${XML_PORT}" -v "$HTTP_PORT" \
+  -i "${XML_CONNECTOR}" -t "attr" -n "${XML_TIMEOUT}" -v "$HTTP_TIMEOUT" \
+  -i "${XML_CONNECTOR}" -t "attr" -n "${XML_REDIRECT_PORT}" -v "${HTTP_REDIRECT_PORT:-8443}" \
+  -i "${XML_CONNECTOR}" -t "attr" -n "${XML_SECURE}" -v "${HTTP_SECURE}" \
+  -i "${XML_CONNECTOR}" -t "attr" -n "${XML_PROTOCOL}" -v "${HTTP_PROTOCOL}" \
   /camunda/conf/server.xml
 
 if [[ "$HTTP_PROXY" == "true" ]]; then
   echo "Configure proxy http listener"
   xmlstarlet ed -L \
-    -u "${XML_PROXY_PORT}" -v "${HTTP_PROXY_HOST}" \
-    -u "${XML_PROXY_HOST}" -v "${HTTP_PROXY_PORT}" \
-    -u "${XML_REDIRECT_PORT}" -v "${HTTP_PROXY_PORT}" \
+    -d "${XML_CONNECTOR}/@${XML_PROXY_HOST}" \
+    -d "${XML_CONNECTOR}/@${XML_PROXY_PORT}" \
+    -d "${XML_CONNECTOR}/@${XML_REDIRECT_PORT}" \
+    -i "${XML_CONNECTOR}" -t "attr" -n "${XML_PROXY_HOST}" -v "${HTTP_PROXY_HOST}" \
+    -i "${XML_CONNECTOR}" -t "attr" -n "${XML_PROXY_PORT}" -v "${HTTP_PROXY_PORT}" \
+    -i "${XML_CONNECTOR}" -t "attr" -n "${XML_REDIRECT_PORT}" -v "${HTTP_REDIRECT_PORT}" \
     /camunda/conf/server.xml
 fi
 
