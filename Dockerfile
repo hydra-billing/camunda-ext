@@ -1,3 +1,32 @@
+FROM alpine as artifacts
+
+RUN apk add git maven openjdk8 bash zip curl -f
+
+COPY ./demo_processes/pizza_order/src      /usr/src/demo_processes/pizza_order/src
+COPY ./demo_processes/pizza_order/pom.xml  /usr/src/demo_processes/pizza_order/pom.xml
+COPY ./demo_processes/pizza_order/build.sh /usr/src/demo_processes/pizza_order/build.sh
+
+COPY ./seed/src                            /usr/src/seed/src
+COPY ./seed/pom.xml                        /usr/src/seed/pom.xml
+COPY ./seed/build.sh                       /usr/src/seed/build.sh
+COPY ./src                                 /usr/src/src
+COPY ./pom.xml                             /usr/src/pom.xml
+
+ENV ROOT_DIR /usr/src/
+
+WORKDIR $ROOT_DIR
+
+# Build camunda-ext
+RUN mvn clean compile package
+
+# Copy all JAR dependencies to ./target/dependencies
+RUN mvn dependency:copy-dependencies -U
+
+# Build seed
+RUN cd ./seed && \
+    ./build.sh && \
+    cd $ROOT_DIR
+
 FROM camunda/camunda-bpm-platform:7.9.0
 
 SHELL ["/bin/bash", "-c"]
@@ -13,11 +42,9 @@ RUN sed -i 's/<!-- <filter>/<filter>/' /camunda/webapps/engine-rest/WEB-INF/web.
 COPY --chown=camunda:camunda ./camunda.sh /camunda/
 COPY ./context.xml /camunda/conf/
 
-COPY ./target/dependencies/*.jar /camunda/lib/
-COPY ./demo_processes/list /camunda/demo/war.lst
-COPY ./demo_processes/*/target/*.war /camunda/webapps/
-COPY ./seed/target/*.war /camunda/webapps/
-COPY ./target/camunda-ext-*.jar /camunda/lib/camunda-ext.jar
+COPY --from=artifacts /usr/src/target/dependencies/*.jar /camunda/lib/
+COPY --from=artifacts /usr/src/seed/target/*.war /camunda/webapps/
+COPY --from=artifacts /usr/src/target/camunda-ext-*.jar /camunda/lib/camunda-ext.jar
 
 ENV DB_DRIVER= \
     DB_HOST= \
