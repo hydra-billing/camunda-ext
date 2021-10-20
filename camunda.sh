@@ -101,7 +101,7 @@ export HISTORY_LEVEL="${HISTORY_LEVEL:-${BPM_HISTORY_LEVEL:-full}}"
 
 XML_PLATFORM_NAMESPACE="http://www.camunda.org/schema/1.0/BpmPlatform"
 XML_PLATFORM_PROPERTIES="//xmlns:bpm-platform/xmlns:process-engine/xmlns:properties/xmlns:property"
-XML_HISTORY_LEVEL="${XML_PLATFORM_PROPERTIES}[@name='history']"
+XML_PLATFORM_HISTORY_LEVEL="${XML_PLATFORM_PROPERTIES}[@name='history']"
 
 echo "Configure bpm platform"
 xmlstarlet ed -L \
