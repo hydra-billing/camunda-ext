@@ -97,7 +97,7 @@ if [[ "$HTTP_PROXY" == "true" ]]; then
     /camunda/conf/server.xml
 fi
 
-export HISTORY_LEVEL="${HISTORY_LEVEL:-${BPM_HISTORY_LEVEL:-full}}"
+export HISTORY_LEVEL="${HISTORY_LEVEL:-${BPM_HISTORY_LEVEL:-none}}"
 
 XML_PLATFORM_NAMESPACE="http://www.camunda.org/schema/1.0/BpmPlatform"
 XML_PLATFORM_PROPERTIES="//xmlns:bpm-platform/xmlns:process-engine/xmlns:properties/xmlns:property"
