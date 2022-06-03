@@ -1,0 +1,10 @@
+{
+  "realm": "hydra",
+  "auth-server-url": "http://localhost:8081/auth/",
+  "ssl-required": "external",
+  "resource": "camunda-identity-service",
+  "credentials": {
+    "secret": "4cc3506c-91fb-41eb-8494-ec55d667c8e0"
+  },
+  "confidential-port": 0
+}

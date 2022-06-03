@@ -66,3 +66,21 @@ docker-compose up -d
 ```
 
 Then open http://localhost:8080/camunda with `user:changeme` credentials.
+
+## How to build with SSO
+
+Do the same steps like without SSO to install build tools (sdkman, java, groovy, maven).
+
+After that:
+```bash
+mvn clean install -f ./pom-sso.xml
+mvn dependency:copy-dependencies -Dcamunda-ext-1.6.version=1.6 -f ./sso/libs/third-party-libs/pom.xm
+mvn dependency:copy-dependencies -Dcamunda-ext-1.6.version=1.6 -f ./sso/libs/webapp-libs/pom.xml
+mvn dependency:copy-dependencies -Dcamunda-ext-1.6.version=1.6 -f ./sso/libs/engine-rest-libs/pom.xml
+
+docker build -f Dockerfile.new_camunda_sso -t new_camunda_sso .
+```
+
+Keycloak must be configured according to the tutorial: https://github.com/camunda-community-hub/camunda-platform-7-keycloak#prerequisites-in-your-keycloak-realm
+
+In `sso/conf/bpm-platform.xml` set actual settings in KeycloakIdentityProviderPlugin properties (keycloakIssuerUrl, keycloakAdminUrl, clientId, clientSecret).

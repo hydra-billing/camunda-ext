@@ -1,0 +1,55 @@
+FROM camunda/camunda-bpm-platform:7.14.0
+
+SHELL ["/bin/bash", "-c"]
+USER root
+RUN rm -rf /camunda/webapps/camunda-invoice \
+           /camunda/webapps/examples \
+           /camunda/lib/groovy-all-2.4.13.jar \
+           /camunda/lib/mail-1.4.1.jar && \
+    apk add wget curl busybox-extras -f
+
+USER camunda
+
+RUN sed -i 's/connectionTimeout="20000"/connectionTimeout="600000"/g' /camunda/conf/server.xml
+
+COPY --chown=camunda:camunda ./camunda.sh /camunda/
+COPY ./context.xml /camunda/conf/
+
+COPY ./sso/tomcat-users.xml          /camunda/conf/tomcat-users.xml
+COPY ./sso/conf/bpm-platform.xml     /camunda/conf/bpm-platform.xml
+COPY ./sso/conf/engine-rest.xml      /camunda/webapps/engine-rest/WEB-INF/web.xml
+COPY ./sso/conf/webapp-sso.xml       /camunda/webapps/camunda/WEB-INF/web.xml
+COPY ./sso/conf/keycloak.json        /camunda/webapps/camunda/WEB-INF/keycloak.json
+
+COPY ./target/                                        /camunda/lib/
+COPY ./sso/libs/third-party-libs/target/dependency/   /camunda/lib/
+COPY ./sso/libs/webapp-libs/target/dependency/        /camunda/lib/webapps/camunda/WEB-INF/lib/
+COPY ./sso/libs/engine-rest-libs/target/dependency/   /camunda/lib/engine-rest/camunda/WEB-INF/lib/
+
+
+# COPY ./demo_processes/list /camunda/demo/war.lst
+# COPY ./demo_processes/*/target/*.war /camunda/webapps/
+# COPY ./seed/target/*.war /camunda/webapps/
+
+
+ENV DB_DRIVER= \
+    DB_HOST= \
+    DB_PORT= \
+    DB_NAME= \
+    DB_USERNAME= \
+    DB_PASSWORD= \
+    DB_URL=
+
+LABEL maintainer="Hydra Billing <info@hydra-billing.com>" \
+  org.opencontainers.image.authors="Hydra Billing <info@hydra-billing.com>" \
+  org.opencontainers.image.title="camunda-ext" \
+  org.opencontainers.image.description="Camunda with camunda-ext library inside" \
+  org.opencontainers.image.vendor="Hydra Billing Solutions LLC" \
+  org.opencontainers.image.licenses="Apache License 2.0" \
+  org.opencontainers.image.url="https://hub.docker.com/r/latera/camunda" \
+  org.openbuildservice.disturl="https://github.com/latera/camunda-ext/releases" \
+  org.opencontainers.image.source="https://github.com/latera/camunda-ext.git" \
+  org.opencontainers.image.documentation="https://latera.github.io/camunda-ext"
+
+HEALTHCHECK --start-period=60s \
+  CMD wget -q --spider http://127.0.0.1:8080/camunda/app/welcome
