@@ -11,7 +11,6 @@
     <url>https://github.com/latera/camunda-ext</url>
   </scm>
   <properties>
-    <kotlin.version>1.4.32</kotlin.version>
     <junit-jupiter.version>5.7.2</junit-jupiter.version>
     <junit-vintage.version>5.7.2</junit-vintage.version>
     <assertj-core.version>3.20.1</assertj-core.version>
@@ -27,7 +26,7 @@
     <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
     <buildnumber-maven-plugin.version>1.4</buildnumber-maven-plugin.version>
     <maven-jar-plugin.version>2.3.2</maven-jar-plugin.version>
-    <camunda.version>7.9.0</camunda.version>
+    <camunda.version>7.14.0</camunda.version>
     <camunda.commons.version>1.6.0</camunda.commons.version>
     <slf4j-api.version>1.7.7</slf4j-api.version>
     <slf4j-simple.version>1.7.13</slf4j-simple.version>
@@ -53,8 +52,6 @@
     <sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
     <sonar.projectKey>camunda-ext</sonar.projectKey>
     <sonar.projectName>camunda-ext</sonar.projectName>
-    <ktor.version>1.5.4</ktor.version>
-    <gson.version>2.8.6</gson.version>
     <!--
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <sonar.organization>latera</sonar.organization>
@@ -98,11 +95,6 @@
   </dependencyManagement>
   <dependencies>
     <dependency>
-      <groupId>io.ktor</groupId>
-      <artifactId>ktor-client</artifactId>
-      <version>${ktor.version}</version>
-    </dependency>
-    <dependency>
       <groupId>org.codehaus.groovy</groupId>
       <artifactId>groovy-all</artifactId>
       <version>${groovy.version}</version>
@@ -113,11 +105,6 @@
       <artifactId>camunda-engine</artifactId>
       <version>${camunda.version}</version>
       <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jetbrains.kotlin</groupId>
-      <artifactId>kotlin-stdlib</artifactId>
-      <version>${kotlin.version}</version>
     </dependency>
     <dependency>
       <groupId>org.assertj</groupId>
@@ -297,36 +284,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-      <version>${gson.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.ktor</groupId>
-      <artifactId>ktor-client-apache</artifactId>
-      <version>${ktor.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.ktor</groupId>
-      <artifactId>ktor-client-auth-jvm</artifactId>
-      <version>${ktor.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.ktor</groupId>
-      <artifactId>ktor-client-json-jvm</artifactId>
-      <version>${ktor.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.ktor</groupId>
-      <artifactId>ktor-client-gson</artifactId>
-      <version>${ktor.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.ktor</groupId>
-      <artifactId>ktor-client-auth-basic</artifactId>
-      <version>${ktor.version}</version>
-    </dependency>
-    <dependency>
       <groupId>io.vavr</groupId>
       <artifactId>vavr</artifactId>
       <version>${vavr.version}</version>
@@ -336,16 +293,6 @@
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
       <version>${snakeyaml.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.ktor</groupId>
-      <artifactId>ktor-client-mock</artifactId>
-      <version>${ktor.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.ktor</groupId>
-      <artifactId>ktor-client-mock-jvm</artifactId>
-      <version>${ktor.version}</version>
     </dependency>
   </dependencies>
   <build>
@@ -394,36 +341,6 @@
             <version>${groovy.version}</version>
           </dependency>
         </dependencies>
-      </plugin>
-      <plugin>
-        <artifactId>kotlin-maven-plugin</artifactId>
-        <groupId>org.jetbrains.kotlin</groupId>
-        <version>${kotlin.version}</version>
-        <executions>
-          <execution>
-            <id>compile</id>
-            <goals>
-              <goal>compile</goal>
-            </goals>
-            <configuration>
-              <sourceDirs>
-                <sourceDir>${project.basedir}/src/org/camunda/latera/kotlin</sourceDir>
-              </sourceDirs>
-            </configuration>
-          </execution>
-          <execution>
-            <id>test-compile</id>
-            <goals>
-              <goal>test-compile</goal>
-            </goals>
-            <configuration>
-              <sourceDirs>
-                <sourceDir>${project.basedir}/src/org/camunda/latera/kotlin</sourceDir>
-                <testSourceDirectory>${project.basedir}/test/kotlin</testSourceDirectory>
-              </sourceDirs>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -527,56 +444,12 @@
         <artifactId>sonar-maven-plugin</artifactId>
         <version>${sonar-maven-plugin.version}</version>
       </plugin>
-      <!--
-      <plugin>
-        <groupId>org.eluder.coveralls</groupId>
-        <artifactId>coveralls-maven-plugin</artifactId>
-        <version>4.3.0</version>
-        <configuration>
-          <repoToken>yourcoverallsprojectrepositorytoken</repoToken>
-        </configuration>
-        <executions>
-          <execution>
-            <id>report-export</id>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>report</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      -->
       <plugin>
         <groupId>com.bluetrainsoftware.maven</groupId>
         <artifactId>groovydoc-maven-plugin</artifactId>
         <version>${groovydoc-maven-plugin.version}</version>
         <configuration>
           <destinationDirectory>${project.basedir}/docs</destinationDirectory>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.jetbrains.dokka</groupId>
-        <artifactId>dokka-maven-plugin</artifactId>
-        <version>${dokka.version}</version>
-        <executions>
-          <execution>
-            <phase>pre-site</phase>
-            <goals>
-              <goal>dokka</goal>
-              <goal>javadoc</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <outputDir>${project.basedir}/kotlin-docs</outputDir>
-          <sourceDirectories>
-            <dir>${project.basedir}/src/org/camunda/latera/kotlin</dir>
-          </sourceDirectories>
-          <sourceLinks>
-            <link>
-              <lineSuffix>#L</lineSuffix>
-            </link>
-          </sourceLinks>
         </configuration>
       </plugin>
     </plugins>

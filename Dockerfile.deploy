@@ -44,7 +44,7 @@ RUN cd ./demo_processes && \
 RUN cd ./demo_processes && \
     find ./ -type d -maxdepth 1 -mindepth 1 -exec bash -c "cd {} && echo \$(basename \$(pwd))" ';' > $ROOT_DIR/demo_processes/list
 
-FROM camunda/camunda-bpm-platform:7.9.0
+FROM camunda/camunda-bpm-platform:7.14.0
 
 SHELL ["/bin/bash", "-c"]
 
