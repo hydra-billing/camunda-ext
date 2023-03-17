@@ -1,3 +1,7 @@
+v1.5.6[unreleased]
+### Bugfixes
+  - [#117](https://github.com/hydra-billing/camunda-ext/pull/117) Update http-builder-ng to custom 1.0.5 to use actual OkHTTP
+
 v1.5.5 [2021-07-08]
 -------------------
 ### Bugfixes
