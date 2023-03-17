@@ -1,4 +1,4 @@
-v1.5.5 [2021-07-08]
+v1.5.11 [2021-07-08]
 -------------------
 ### Bugfixes
 - [#101](https://github.com/latera/camunda-ext/pull/101) Fix typo in putCustomer method
