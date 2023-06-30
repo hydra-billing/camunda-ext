@@ -217,7 +217,7 @@ trait File {
   Boolean deleteFile(CharSequence bucketName, CharSequence fileName) {
     try {
       logger.info("Deleting file with name ${fileName} from bucket ${bucketName}")
-      client.removeFile(bucketName, fileName)
+      client.removeObject(bucketName, fileName)
       logger.info("  File was deleted successfully!")
       return true
     } catch (MinioException e) {
@@ -234,7 +234,7 @@ trait File {
   Boolean deleteFiles(CharSequence bucketName, List fileNames) {
     try {
       logger.info("Deleting files ${fileNames} from bucket ${bucketName}")
-      client.removeFiles(bucketName, fileNames)
+      client.removeObjects(bucketName, fileNames)
       logger.info("  Files were deleted successfully!")
       return true
     } catch (MinioException e) {
