@@ -24,7 +24,7 @@ object JasperClient {
           password = passwd
         }
       }
-      
+
       if (!useSSL) {
         engine {
           customizeClient {
