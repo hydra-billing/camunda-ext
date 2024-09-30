@@ -1,3 +1,8 @@
+v1.5.13 [2024-11-14]
+-------------------
+### Bugfixes
+  - [#120](https://github.com/hydra-billing/camunda-ext/pull/120) Add process definition key to the task event webhook
+
 v1.5.11 [2023-03-23]
 -------------------
 ### Bugfixes
