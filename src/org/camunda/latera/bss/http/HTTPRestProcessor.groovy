@@ -13,17 +13,21 @@ import static org.camunda.latera.bss.utils.JSON.escape
 import org.camunda.latera.bss.http.YmlApiProcessor
 
 class HTTPRestProcessor {
-  OkHttpBuilder httpClient
   String baseUrl
   String basePath
   Boolean testEnv
   SimpleLogger logger
   Boolean supressRequestBodyLog
   Boolean supressResponseBodyLog
+  Map headers
+  String user
+  String password
+
+  private static final Map<String, OkHttpBuilder> cachedBuilders = [:]
 
   HTTPRestProcessor(Map params) {
     this.logger = new SimpleLogger(params.execution)
-    def ENV     = System.getenv()
+    def ENV = System.getenv()
 
     this.testEnv  = ENV['CAMUNDA_EXT_ENV'] == 'test'
     this.baseUrl  = params.baseUrl
@@ -47,55 +51,40 @@ class HTTPRestProcessor {
       ENV['HTTP_SUPRESS_BODY']
     ], false))
 
-    params.remove('supressRequestBodyLog')
-    params.remove('supressResponseBodyLog')
-    params.remove('execution')
+    if (!cachedBuilders.containsKey(this.baseUrl)) {
+      def httpClient = OkHttpBuilder.configure {
+        request.uri = this.baseUrl.toString()
 
-    this.httpClient = OkHttpBuilder.configure {
-      request.uri = this.baseUrl.toString()
-      params.remove('baseUrl')
 
-      request.contentType = 'application/json'
-      response.success responseBlock(false, this.supressRequestBodyLog)
-      response.failure responseBlock(true,  this.supressResponseBodyLog)
+        request.contentType = 'application/json'
+        response.success responseBlock(false, this.supressRequestBodyLog)
+        response.failure responseBlock(true,  this.supressResponseBodyLog)
 
-      client.clientCustomizer {
-        it.followRedirects = true
-        it.connectTimeout(ENV['HTTP_CONNECT_TIMEOUT_SEC'].toInteger(), TimeUnit.SECONDS)
-        it.readTimeout(ENV['HTTP_READ_TIMEOUT_SEC'].toInteger(), TimeUnit.SECONDS)
-        it.writeTimeout(ENV['HTTP_WRITE_TIMEOUT_SEC'].toInteger(), TimeUnit.SECONDS)
-      }
-
-      !ENV['HTTP_USE_SSL'].toBoolean() && ignoreSslIssues(execution)
-
-      if (notEmpty(params.user) && notEmpty(params.password)) {
-        request.auth.basic(params.user, params.password)
-        params.remove('user')
-        params.remove('password')
-      }
-
-      if (params) {
-        if (params.client) {
-          params.client.each { k,v ->
-            client."${k}" = v
-          }
-          params.remove('client')
+        client.clientCustomizer {
+          it.followRedirects = true
+          it.connectTimeout(ENV['HTTP_CONNECT_TIMEOUT_SEC'].toInteger(), TimeUnit.SECONDS)
+          it.readTimeout(ENV['HTTP_READ_TIMEOUT_SEC'].toInteger(), TimeUnit.SECONDS)
+          it.writeTimeout(ENV['HTTP_WRITE_TIMEOUT_SEC'].toInteger(), TimeUnit.SECONDS)
         }
+
+        !ENV['HTTP_USE_SSL'].toBoolean() && ignoreSslIssues(execution)
+
+        if (notEmpty(params.user) && notEmpty(params.password)) {
+          this.user = params.user
+          this.password = params.password
+        }
+
         if (params.headers) {
-          params.headers.each { k,v ->
-            request.headers."${k}" = v
-          }
-          params.remove('headers')
-        }
-        params.each { k,v ->
-          request."${k}" = v
+          this.headers = params.headers
         }
       }
+
+      cachedBuilders[this.baseUrl] = httpClient
     }
   }
 
   def private responseBlock(Boolean failure = false, Boolean supress = false) {
-    {FromServer response, Object data ->
+    { FromServer response, Object data ->
       logger.debug("Response status: ${response.statusCode}")
       logger.debug("Content-Type: ${response.contentType}")
       logger.debug("Response data: -----")
@@ -120,6 +109,10 @@ class HTTPRestProcessor {
         data
       }
     }
+  }
+
+  def getBuilder(baseUrl) {
+    return this.cachedBuilders[baseUrl]
   }
 
   def sendRequest(Map paramsInput, CharSequence method = 'get') {
@@ -160,7 +153,7 @@ class HTTPRestProcessor {
       YmlApiProcessor ymlAPI = new YmlApiProcessor();
       result = ymlAPI.sendRequest(params, method)
     } else {
-      result = httpClient."${method}" {
+      result = getBuilder(this.baseUrl)."${method}" {
         response.success responseBlock(false, supressResponseBody)
         response.failure responseBlock(true,  supressResponseBody)
 
@@ -173,6 +166,16 @@ class HTTPRestProcessor {
 
         params.remove('query')
         params.remove('path')
+
+        if (notEmpty(this.user) && notEmpty(this.password)) {
+          request.auth.basic(this.user, this.password)
+        }
+
+        if (this.headers) {
+          this.headers.each { k,v ->
+            request.headers."${k}" = v
+          }
+        }
 
         params.each { k,v ->
           request."${k}" = v
