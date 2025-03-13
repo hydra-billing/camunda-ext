@@ -51,10 +51,18 @@ class HTTPRestProcessor {
       ENV['HTTP_SUPRESS_BODY']
     ], false))
 
+    if (notEmpty(params.user) && notEmpty(params.password)) {
+      this.user = params.user
+      this.password = params.password
+    }
+
+    if (params.headers) {
+      this.headers = params.headers
+    }
+
     if (!cachedBuilders.containsKey(this.baseUrl)) {
       def httpClient = OkHttpBuilder.configure {
         request.uri = this.baseUrl.toString()
-
 
         request.contentType = 'application/json'
         response.success responseBlock(false, this.supressRequestBodyLog)
@@ -68,15 +76,6 @@ class HTTPRestProcessor {
         }
 
         !ENV['HTTP_USE_SSL'].toBoolean() && ignoreSslIssues(execution)
-
-        if (notEmpty(params.user) && notEmpty(params.password)) {
-          this.user = params.user
-          this.password = params.password
-        }
-
-        if (params.headers) {
-          this.headers = params.headers
-        }
       }
 
       cachedBuilders[this.baseUrl] = httpClient
