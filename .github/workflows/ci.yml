@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [v1.5]
+  pull_request:
+    branches: [v1.5]
+
+jobs:
+  run-camunda-ext-ci:
+
+    runs-on: ubuntu-latest
+
+    env:
+      GITHUB_TOKEN: ${{ secrets.HYDRA_BILLING_ROBOT_TOKEN }}
+
+    steps:
+      - name: run camunda-ext ci
+        run: gh workflow run ci.yml -R hydra-billing/camunda-ext-ci -f branch=${{ github.head_ref || github.ref_name }} -f run_id=${{ github.run_id }}
+
+      - name: wait for camunda-ext ci
+        run: |
+          while [ -z "${run_id}" ]; do
+            run_id=$(gh run list -w ci.yml -R hydra-billing/camunda-ext-ci --json name,databaseId --jq '.[] | select(.name? | match(" ${{ github.run_id }}$")) | .databaseId')
+            sleep 5
+          done
+          gh run watch -R hydra-billing/camunda-ext-ci ${run_id} --exit-status -i 60 >/dev/null
