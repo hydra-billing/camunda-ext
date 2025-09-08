@@ -98,7 +98,7 @@ class VersionSpec extends Specification {
 
     where:
     first    |second   |result
-    '5.1.2.5'|'5.1.2.5'| 0
+    '5.1.2.6'|'5.1.2.5'| 0
     '5.1.2.5'|'4.1.2.5'| 1
     '5.1.2.5'|'5.1.2'  | 0
     '5.1.2.5'|'4.1.2'  | 1
