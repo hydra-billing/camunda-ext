@@ -87,13 +87,13 @@ class Order implements GroovyObject {
 
     // '123431201' -> new BigInteger(123431201), but '123431201.0' -> '123431201.0'
     def number = toIntStrict(result)
-    if (number != null) {
+    if (number != null && number.toString() == result) {
       return number
     }
 
     // '0.00' -> new BigDecimal(0.00), '0' -> new BigInteger(0), but '0ASF' -> '0ASF'
     number = toFloatSafe(result)
-    if (number != null) {
+    if (number != null && number.toString() == result) {
       return number
     }
 
