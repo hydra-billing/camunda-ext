@@ -74,14 +74,6 @@
   </properties>
   <repositories>
     <repository>
-      <id>jcenter</id>
-      <url>https://jcenter.bintray.com</url>
-    </repository>
-    <repository>
-      <id>maven.org</id>
-      <url>https://repo1.maven.org/maven2</url>
-    </repository>
-    <repository>
       <id>nexus</id>
       <url>https://maven.dl.latera.ru</url>
     </repository>
@@ -460,9 +452,8 @@
   </build>
   <pluginRepositories>
     <pluginRepository>
-      <id>jcenter</id>
-      <name>JCenter</name>
-      <url>https://jcenter.bintray.com/</url>
+      <id>nexus</id>
+      <url>https://maven.dl.latera.ru</url>
       <releases>
         <enabled>true</enabled>
       </releases>
